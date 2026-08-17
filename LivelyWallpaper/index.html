@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flip Clock Wallpaper</title>
+    <link rel="stylesheet" href="./flipclock.css" />
+    <style>
+        :root {
+            --accent: #0a84ff;
+            --glass: rgba(255, 255, 255, 0.16);
+            --glass-strong: rgba(255, 255, 255, 0.24);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --label: #1c1c1e;
+            --secondary: rgba(28, 28, 30, 0.65);
+            --radius: 22px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+            background: #000;
+            color: var(--label);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ---------- Liquid Glass wallpaper background ---------- */
+        #ambient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            --blob-a: #0a84ff;
+            --blob-b: #ff2d55;
+            --blob-c: #00b8a9;
+            background:
+                radial-gradient(1300px 1000px at 85% -10%, color-mix(in srgb, var(--blob-a) 55%, transparent), transparent 55%),
+                radial-gradient(1100px 900px at -10% 110%, color-mix(in srgb, var(--blob-b) 50%, transparent), transparent 55%),
+                radial-gradient(1000px 800px at 100% 100%, color-mix(in srgb, var(--blob-c) 55%, transparent), transparent 55%),
+                radial-gradient(900px 700px at 20% 20%, rgba(175, 82, 222, 0.45), transparent 55%),
+                linear-gradient(160deg, #1a3a5c 0%, #2b1e4f 35%, #6b2a5b 100%);
+            transition: background 3s ease;
+        }
+
+        #ambient::before,
+        #ambient::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.6;
+        }
+
+        #ambient::before {
+            width: 50vw;
+            height: 50vw;
+            left: -12vw;
+            top: -14vw;
+            background: #00b8a9;
+            animation: drift 28s ease-in-out infinite alternate;
+        }
+
+        #ambient::after {
+            width: 44vw;
+            height: 44vw;
+            right: -10vw;
+            bottom: -16vw;
+            background: #ff2d55;
+            animation: drift 36s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+            to {
+                transform: translate(5vw, 4vw) scale(1.15);
+            }
+        }
+
+        #app {
+            position: absolute;
+            left: 25%;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem;
+        }
+
+        #clock {
+            position: relative;
+            display: inline-flex;
+        }
+
+        #date {
+            font-size: clamp(1rem, 1.8vw, 1.5rem);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--secondary);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* ---------- Liquid Glass specular highlight ---------- */
+        .glass-sheen {
+            position: relative;
+        }
+
+        .glass-sheen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background:
+                linear-gradient(125deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 38%),
+                radial-gradient(120% 60% at 100% 0%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 55%);
+        }
+
+        /* ---------- Quote (Liquid Glass widget) ---------- */
+        #quote {
+            align-self: flex-end;
+            max-width: 52vw;
+            text-align: center;
+            font-size: clamp(1rem, 1.6vw, 1.3rem);
+            line-height: 1.6;
+            color: var(--label);
+            padding: 1.1rem 1.6rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.5) inset,
+                0 -6px 24px rgba(255, 255, 255, 0.12) inset,
+                0 12px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        #quote .quote-text {
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        #quote .quote-author {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.8em;
+            font-style: normal;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--secondary);
+        }
+
+        #quote .quote-cat {
+            display: inline-block;
+            margin-top: 0.8rem;
+            padding: 0.25rem 0.9rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 999px;
+            color: var(--secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        #quote .quote-cat:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ---------- To-Do (vertical list, Liquid Glass) ---------- */
+        #todo {
+            align-self: flex-end;
+            width: min(440px, 40vw);
+            max-height: 46vh;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 26px;
+            backdrop-filter: blur(36px) saturate(200%);
+            -webkit-backdrop-filter: blur(36px) saturate(200%);
+            padding: 1.1rem 1.2rem 1rem;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.55) inset,
+                0 -8px 28px rgba(255, 255, 255, 0.12) inset,
+                0 16px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        #todo-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex: 0 0 auto;
+            margin-bottom: 0.7rem;
+        }
+
+        #todo h2 {
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+            text-transform: none;
+            font-weight: 700;
+            color: var(--label);
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #todo-count {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            color: var(--secondary);
+            white-space: nowrap;
+        }
+
+        #todo-detail-btn {
+            flex: 0 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--label);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.28rem 0.9rem;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        #todo-detail-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        #todo-form {
+            display: flex;
+            gap: 0.5rem;
+            flex: 0 0 auto;
+            margin-bottom: 0.8rem;
+        }
+
+        #todo-form input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 14px;
+            padding: 0.55rem 0.9rem;
+            color: var(--label);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s ease, background 0.15s ease;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+        }
+
+        #todo-form input[type="text"]:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.42);
+        }
+
+        #todo-form input[type="text"]::placeholder {
+            color: rgba(28, 28, 30, 0.4);
+        }
+
+        #todo-form button {
+            flex: 0 0 auto;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.22));
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            border-radius: 14px;
+            padding: 0.55rem 1.1rem;
+            color: var(--accent);
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: filter 0.15s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        #todo-form button:hover {
+            filter: brightness(1.1);
+        }
+
+        /* vertical list of today's tasks */
+        #todo-strip {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 0.15rem 0.25rem 0.4rem;
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(28, 28, 30, 0.55) rgba(255, 255, 255, 0.18);
+        }
+
+        #todo-strip::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        #todo-strip::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 6px;
+        }
+
+        #todo-strip::-webkit-scrollbar-thumb {
+            background: rgba(28, 28, 30, 0.55);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            background-clip: padding-box;
+            min-height: 32px;
+        }
+
+        #todo-strip::-webkit-scrollbar-thumb:hover {
+            background: rgba(28, 28, 30, 0.75);
+            background-clip: padding-box;
+        }
+
+        .todo-chip {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            width: 100%;
+            max-width: none;
+            padding: 0.55rem 0.7rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.12s ease;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+        }
+
+        .todo-chip:hover {
+            background: rgba(255, 255, 255, 0.36);
+        }
+
+        .todo-chip.done {
+            opacity: 0.5;
+        }
+
+        .todo-chip .box {
+            flex: 0 0 auto;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: transparent;
+            transition: all 0.15s ease;
+        }
+
+        .todo-chip.done .box {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .todo-chip .label {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 0.9rem;
+            line-height: 1.35;
+            color: var(--label);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .todo-chip.done .label {
+            text-decoration: line-through;
+            opacity: 0.45;
+        }
+
+        .todo-chip .when {
+            flex: 0 0 auto;
+            font-size: 0.6rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.16rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.34);
+            color: var(--secondary);
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+
+        .todo-chip .when:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .todo-chip .when.overdue {
+            color: #ff2d55;
+            background: rgba(255, 45, 85, 0.16);
+        }
+
+        .todo-chip .del {
+            flex: 0 0 auto;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--secondary);
+            font-size: 0.95rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .todo-chip .del:hover {
+            color: #ff2d55;
+            background: rgba(255, 45, 85, 0.18);
+        }
+
+        .todo-chip .edit,
+        .todo-item .edit {
+            flex: 0 0 auto;
+            width: 1.3rem;
+            height: 1.3rem;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .todo-chip .edit:hover,
+        .todo-item .edit:hover {
+            color: var(--accent);
+            background: rgba(10, 132, 255, 0.16);
+        }
+
+        .edit-input {
+            flex: 1 1 auto;
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 0.3rem 0.5rem;
+            color: var(--label);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .todo-chip .when.repeat,
+        .todo-item .when.repeat {
+            background: rgba(10, 132, 255, 0.18);
+            color: var(--accent);
+        }
+
+        #todo-strip .empty {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            padding: 0.75rem 0;
+        }
+
+        /* ---------- To-Do detail overlay (day-wise) ---------- */
+        #todo-detail {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 14, 24, 0.4);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.28s ease;
+        }
+
+        #todo-detail.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #todo-detail-panel {
+            width: min(1200px, 92vw);
+            max-height: 82vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            padding: 1.4rem 1.5rem;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.55) inset,
+                0 -10px 32px rgba(255, 255, 255, 0.12) inset,
+                0 24px 64px rgba(0, 0, 0, 0.5);
+        }
+
+        #todo-detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 0 0 auto;
+            margin-bottom: 1rem;
+        }
+
+        #todo-detail-header h2 {
+            font-size: 1.15rem;
+            color: var(--label);
+        }
+
+        #todo-detail-close {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--label);
+            width: 2.1rem;
+            height: 2.1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        #todo-detail-close:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        #todo-detail-cols {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.2rem;
+            overflow: hidden;
+        }
+
+        .td-section {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            border-radius: 20px;
+            padding: 0.9rem 1rem;
+        }
+
+        .td-section h3 {
+            flex: 0 0 auto;
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin-bottom: 0.6rem;
+        }
+
+        .td-section ul {
+            flex: 1 1 auto;
+            min-height: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .td-section ul::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .td-section ul::-webkit-scrollbar-thumb {
+            background: rgba(28, 28, 30, 0.2);
+            border-radius: 3px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.12s ease;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+        }
+
+        .todo-item:hover {
+            background: rgba(255, 255, 255, 0.36);
+        }
+
+        .todo-item .box {
+            flex: 0 0 auto;
+            width: 1.1rem;
+            height: 1.1rem;
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: transparent;
+            transition: all 0.15s ease;
+        }
+
+        .todo-item.done .box {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .todo-item .label {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 0.95rem;
+            color: var(--label);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .todo-item.done .label {
+            text-decoration: line-through;
+            opacity: 0.45;
+        }
+
+        .todo-item .when {
+            flex: 0 0 auto;
+            font-size: 0.62rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.18rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.34);
+            color: var(--secondary);
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+
+        .todo-item .when:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .todo-item .when.overdue {
+            color: #ff2d55;
+            background: rgba(255, 45, 85, 0.16);
+        }
+
+        .todo-item .del {
+            flex: 0 0 auto;
+            width: 1.3rem;
+            height: 1.3rem;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--secondary);
+            font-size: 1rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .todo-item .del:hover {
+            color: #ff2d55;
+            background: rgba(255, 45, 85, 0.18);
+        }
+
+        /* ---------- Reminder banner ---------- */
+        #reminder {
+            position: fixed;
+            top: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-140%);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            max-width: min(560px, 86vw);
+            background: rgba(28, 32, 48, 0.82);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 18px;
+            padding: 0.75rem 1.1rem 0.75rem 1.4rem;
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+            transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+        }
+
+        #reminder.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #reminder-text {
+            flex: 1 1 auto;
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+
+        #reminder-close {
+            flex: 0 0 auto;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            width: 1.7rem;
+            height: 1.7rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        #reminder-close:hover {
+            background: rgba(255, 255, 255, 0.34);
+        }
+
+        /* ---------- Schedule popover (Liquid Glass menu) ---------- */
+        #schedule {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 18px;
+            padding: 0.5rem;
+            backdrop-filter: blur(36px) saturate(200%);
+            -webkit-backdrop-filter: blur(36px) saturate(200%);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.55) inset,
+                0 16px 48px rgba(0, 0, 0, 0.45);
+            z-index: 20;
+            min-width: 170px;
+        }
+
+        #schedule button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            border-radius: 11px;
+            padding: 0.55rem 0.7rem;
+            color: var(--label);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+
+        #schedule button:hover {
+            background: rgba(255, 255, 255, 0.34);
+        }
+
+        #schedule .menu-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--secondary);
+            padding: 0.35rem 0.7rem 0.2rem;
+        }
+
+        #schedule .repeat-row {
+            display: flex;
+            gap: 0.35rem;
+            padding: 0.2rem 0.55rem 0.45rem;
+        }
+
+        #schedule .repeat-opt {
+            flex: 1;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 11px;
+            padding: 0.4rem 0.3rem;
+            font-size: 0.8rem;
+            color: var(--label);
+            cursor: pointer;
+            transition: background 0.12s ease, color 0.12s ease;
+        }
+
+        #schedule .repeat-opt:hover {
+            background: rgba(255, 255, 255, 0.34);
+        }
+
+        #schedule .repeat-opt.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        #schedule .menu-sep {
+            height: 1px;
+            background: rgba(28, 28, 30, 0.14);
+            margin: 0.2rem 0.4rem;
+        }
+
+        /* ---------- Flip clock overrides (Liquid Glass style) ---------- */
+        .flip-clock {
+            --font-size: clamp(2.5rem, 6vw, 6rem);
+            --width: 0.92em;
+            --height: 1.3em;
+            --border-radius: 0.16em;
+            --animation-duration: 350ms;
+        }
+
+        .flip-clock .flip-clock-divider {
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .flip-clock .flip-clock-card {
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.6) inset,
+                0 2px 8px rgba(0, 0, 0, 0.25),
+                0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .flip-clock .flip-clock-card.top,
+        .flip-clock .flip-clock-card.bottom {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.82));
+            color: #1c1c1e;
+            text-shadow: none;
+        }
+
+        .flip-clock .flip-clock-card.top {
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .flip-clock .flip-clock-card.bottom {
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        .flip-clock .flip-clock-card-item-inner .top,
+        .flip-clock .flip-clock-card-item-inner .bottom {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.82));
+            box-shadow: inset 0 0 0.2em rgba(0, 0, 0, 0.08);
+        }
+
+        @media (max-width: 1000px) {
+            #app {
+                left: 0;
+                align-items: center;
+            }
+
+            #todo {
+                align-self: center;
+                width: min(420px, 90vw);
+                height: auto;
+                max-height: 40vh;
+            }
+
+            #quote {
+                max-width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="ambient"></div>
+
+    <div id="app">
+        <div id="quote" class="glass-sheen"></div>
+        <div id="clock"></div>
+        <div id="date"></div>
+        <aside id="todo" class="glass-sheen">
+            <div id="todo-top">
+                <h2>Today's Tasks <span id="todo-count"></span></h2>
+                <button id="todo-detail-btn" type="button" title="View all tasks">☰ All</button>
+            </div>
+            <form id="todo-form">
+                <input type="text" id="todo-input" placeholder="Add a task…" />
+                <button type="submit">Add</button>
+            </form>
+            <div id="todo-strip"></div>
+        </aside>
+    </div>
+
+    <div id="todo-detail" aria-hidden="true">
+        <div id="todo-detail-panel">
+            <header id="todo-detail-header">
+                <h2>Tasks</h2>
+                <button id="todo-detail-close" type="button">✕</button>
+            </header>
+            <div id="todo-detail-cols">
+                <section class="td-section" id="td-previous">
+                    <h3>Previous (pending)</h3>
+                    <ul id="list-previous"></ul>
+                </section>
+                <section class="td-section" id="td-today">
+                    <h3>Today</h3>
+                    <ul id="list-detail-today"></ul>
+                </section>
+                <section class="td-section" id="td-future">
+                    <h3>Future</h3>
+                    <ul id="list-future"></ul>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="reminder">
+        <span id="reminder-text"></span>
+        <button id="reminder-close" type="button">✕</button>
+    </div>
+
+    <div id="schedule"></div>
+
+    <script src="./quotes.js"></script>
+    <script src="./FlipClock.umd.js"></script>
+    <script>
+        (function () {
+            "use strict";
+
+            /* ---------------- Settings ---------------- */
+
+            var defaults = {
+                format: "[hh]:[mm]:[ss]",
+                clockSize: 1,
+                accent: "#0a84ff",
+                quoteCategory: "Discipline",
+                showTodo: true,
+                showQuote: true
+            };
+
+            var settings = Object.assign({}, defaults);
+
+            var formatItems = [
+                "[hh]:[mm]:[ss]",
+                "[hh]:[mm]",
+                "[HH]:[mm]:[ss]",
+                "[hh]:[mm]:[ss][A]",
+                "[hh]:[mm][A]"
+            ];
+
+            var quoteCategories = ["Discipline", "Hard Work", "Success", "Resilience", "Focus", "Learning", "Courage", "Dreams", "Patience", "Mindset"];
+
+            var els = {
+                clock: document.getElementById("clock"),
+                date: document.getElementById("date"),
+                quote: document.getElementById("quote"),
+                todo: document.getElementById("todo"),
+                form: document.getElementById("todo-form"),
+                input: document.getElementById("todo-input"),
+                strip: document.getElementById("todo-strip"),
+                todoCount: document.getElementById("todo-count"),
+                detail: document.getElementById("todo-detail"),
+                detailBtn: document.getElementById("todo-detail-btn"),
+                detailClose: document.getElementById("todo-detail-close"),
+                listPrevious: document.getElementById("list-previous"),
+                listDetailToday: document.getElementById("list-detail-today"),
+                listFuture: document.getElementById("list-future"),
+                reminder: document.getElementById("reminder"),
+                reminderText: document.getElementById("reminder-text"),
+                reminderClose: document.getElementById("reminder-close"),
+                schedule: document.getElementById("schedule")
+            };
+
+            var instance = null;
+
+            /* ---------------- Storage ---------------- */
+
+            function storage() {
+                try {
+                    return window.localStorage;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function loadJSON(key, fallback) {
+                var store = storage();
+                if (!store) return fallback;
+                try {
+                    var raw = store.getItem(key);
+                    return raw ? JSON.parse(raw) : fallback;
+                } catch (e) {
+                    return fallback;
+                }
+            }
+
+            function saveJSON(key, value) {
+                var store = storage();
+                if (!store) return;
+                try {
+                    store.setItem(key, JSON.stringify(value));
+                } catch (e) {}
+            }
+
+            /* ---------------- To-Do data ---------------- */
+
+            var todoKey = "fcw-todos-v2";
+            var tasks = loadJSON(todoKey, []);
+
+            function uid() {
+                return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            }
+
+            function dateStr(d) {
+                var y = d.getFullYear();
+                var m = String(d.getMonth() + 1).padStart(2, "0");
+                var day = String(d.getDate()).padStart(2, "0");
+                return y + "-" + m + "-" + day;
+            }
+
+            function todayStr() {
+                return dateStr(new Date());
+            }
+
+            function shiftDays(n) {
+                var d = new Date();
+                d.setDate(d.getDate() + n);
+                return dateStr(d);
+            }
+
+            function saveTasks() {
+                saveJSON(todoKey, tasks);
+                renderTodo();
+            }
+
+            function addTask(text) {
+                text = text.trim();
+                if (!text) return;
+                tasks.push({ id: uid(), text: text, done: false, date: null, repeat: null, lastDone: null });
+                saveTasks();
+            }
+
+            function removeTask(id) {
+                tasks = tasks.filter(function (t) {
+                    return t.id !== id;
+                });
+                saveTasks();
+            }
+
+            function editTask(id, text) {
+                text = (text || "").trim();
+                tasks = tasks.map(function (t) {
+                    if (t.id === id) t.text = text;
+                    return t;
+                });
+                saveTasks();
+            }
+
+            function setRepeat(id, repeat) {
+                tasks = tasks.map(function (t) {
+                    if (t.id === id) {
+                        t.repeat = repeat || null;
+                        if (t.repeat && t.date === null) t.date = todayStr();
+                    }
+                    return t;
+                });
+                saveTasks();
+            }
+
+            function toggleTask(id) {
+                tasks = tasks.map(function (t) {
+                    if (t.id === id) {
+                        if (t.repeat) {
+                            t.lastDone = isDone(t) ? null : todayStr();
+                        } else {
+                            t.done = !t.done;
+                        }
+                    }
+                    return t;
+                });
+                saveTasks();
+            }
+
+            function scheduleTask(id, date) {
+                tasks = tasks.map(function (t) {
+                    if (t.id === id) t.date = date;
+                    return t;
+                });
+                saveTasks();
+            }
+
+            function friendlyDate(date) {
+                var today = todayStr();
+                if (date === null) return "No date";
+                if (date === today) return "Today";
+                if (date === shiftDays(1)) return "Tomorrow";
+                var target = new Date(date + "T00:00:00");
+                var opts = { weekday: "short", month: "short", day: "numeric" };
+                return target.toLocaleDateString(undefined, opts);
+            }
+
+            function taskDateKey(date) {
+                var today = todayStr();
+                if (date === null) return today;
+                return date;
+            }
+
+            /* is a recurring task completed for the given day? */
+            function isDone(t) {
+                if (!t.repeat) return !!t.done;
+                if (!t.lastDone) return false;
+                if (t.repeat === "daily") return t.lastDone === todayStr();
+                if (t.repeat === "weekly") {
+                    var ld = new Date(t.lastDone + "T00:00:00");
+                    var now = new Date(todayStr() + "T00:00:00");
+                    return (now - ld) >= 0 && (now - ld) < 7 * 24 * 3600 * 1000;
+                }
+                if (t.repeat === "monthly") {
+                    var lm = new Date(t.lastDone + "T00:00:00");
+                    var nm = new Date(todayStr() + "T00:00:00");
+                    return lm.getFullYear() === nm.getFullYear() && lm.getMonth() === nm.getMonth();
+                }
+                return !!t.done;
+            }
+
+            /* does a recurring task occur on the given day? */
+            function occursOn(t, day) {
+                if (!t.repeat) return true;
+                if (t.repeat === "daily") return true;
+                var anchor = t.date ? new Date(t.date + "T00:00:00") : new Date();
+                var d = new Date(day + "T00:00:00");
+                if (t.repeat === "weekly") return d.getDay() === anchor.getDay();
+                if (t.repeat === "monthly") return d.getDate() === anchor.getDate();
+                return true;
+            }
+
+            function repeatLabel(t) {
+                if (!t.repeat) return null;
+                if (t.repeat === "daily") return "Daily";
+                if (t.repeat === "weekly") return "Weekly";
+                if (t.repeat === "monthly") return "Monthly";
+                return null;
+            }
+
+            /* ---------------- To-Do render ---------------- */
+
+            function buildItem(t, isChip) {
+                var node = document.createElement(isChip ? "div" : "li");
+                node.className = (isChip ? "todo-chip" : "todo-item") + (isDone(t) ? " done" : "");
+                node.dataset.id = t.id;
+
+                var box = document.createElement("span");
+                box.className = "box";
+                box.textContent = "✓";
+                box.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    toggleTask(t.id);
+                });
+
+                var label = document.createElement("span");
+                label.className = "label";
+                label.textContent = t.text;
+                label.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    toggleTask(t.id);
+                });
+
+                var when = document.createElement("span");
+                when.className = "when";
+                var rl = repeatLabel(t);
+                when.textContent = rl || friendlyDate(t.date);
+                if (rl) {
+                    when.classList.add("repeat");
+                    if (t.date !== null && !occursOn(t, todayStr()) && !isDone(t)) {
+                        when.classList.add("overdue");
+                    }
+                } else if (t.date !== null && t.date < todayStr() && !t.done) {
+                    when.classList.add("overdue");
+                }
+                when.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    openSchedule(t, when);
+                });
+
+                var edit = document.createElement("button");
+                edit.className = "edit";
+                edit.type = "button";
+                edit.textContent = "✎";
+                edit.title = "Edit task";
+                edit.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    startEdit(t, label);
+                });
+
+                var del = document.createElement("button");
+                del.className = "del";
+                del.type = "button";
+                del.textContent = "✕";
+                del.title = "Remove";
+                del.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    removeTask(t.id);
+                });
+
+                node.appendChild(box);
+                node.appendChild(label);
+                node.appendChild(when);
+                node.appendChild(edit);
+                node.appendChild(del);
+                return node;
+            }
+
+            function startEdit(t, labelEl) {
+                var input = document.createElement("input");
+                input.type = "text";
+                input.className = "edit-input";
+                input.value = t.text;
+                labelEl.parentNode.replaceChild(input, labelEl);
+                input.focus();
+                input.select();
+                var done = false;
+                function commit() {
+                    if (done) return;
+                    done = true;
+                    editTask(t.id, input.value);
+                    renderTodo();
+                }
+                function cancel() {
+                    if (done) return;
+                    done = true;
+                    renderTodo();
+                }
+                input.addEventListener("keydown", function (e) {
+                    e.stopPropagation();
+                    if (e.key === "Enter") commit();
+                    if (e.key === "Escape") cancel();
+                });
+                input.addEventListener("blur", commit);
+                input.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                });
+            }
+
+            function makeItem(t) {
+                return buildItem(t, false);
+            }
+
+            function makeChip(t) {
+                return buildItem(t, true);
+            }
+
+            function fillList(listEl, items) {
+                listEl.innerHTML = "";
+                items.forEach(function (t) {
+                    listEl.appendChild(makeItem(t));
+                });
+            }
+
+            function emptyState(listEl, text) {
+                var li = document.createElement("li");
+                li.className = "empty";
+                li.textContent = text;
+                listEl.appendChild(li);
+            }
+
+            function openDetail() {
+                els.detail.classList.add("open");
+                els.detail.setAttribute("aria-hidden", "false");
+                renderDetail();
+            }
+
+            function closeDetail() {
+                els.detail.classList.remove("open");
+                els.detail.setAttribute("aria-hidden", "true");
+            }
+
+            function renderDetail() {
+                if (!els.detail.classList.contains("open")) return;
+
+                var today = todayStr();
+                var pending = tasks.filter(function (t) {
+                    return !isDone(t);
+                });
+                var done = tasks.filter(function (t) {
+                    return isDone(t);
+                });
+
+                var previous = pending.filter(function (t) {
+                    if (t.repeat) {
+                        return t.date !== null && !occursOn(t, today);
+                    }
+                    return t.date !== null && t.date < today;
+                });
+                var todayTasks = pending.filter(function (t) {
+                    if (t.repeat) return occursOn(t, today);
+                    return t.date === null || t.date === today;
+                });
+                var future = pending.filter(function (t) {
+                    if (t.repeat) return false;
+                    return t.date !== null && t.date > today;
+                });
+                var todayDone = done.filter(function (t) {
+                    if (t.repeat) return occursOn(t, today);
+                    return t.date === null || t.date === today;
+                });
+
+                fillList(els.listPrevious, previous);
+                if (!previous.length) emptyState(els.listPrevious, "No pending tasks.");
+
+                fillList(els.listDetailToday, todayTasks.concat(todayDone));
+                if (!todayTasks.length && !todayDone.length) emptyState(els.listDetailToday, "Nothing today.");
+
+                fillList(els.listFuture, future);
+                if (!future.length) emptyState(els.listFuture, "No future tasks.");
+            }
+
+            function renderTodo() {
+                if (!settings.showTodo) {
+                    els.todo.style.display = "none";
+                    return;
+                }
+                els.todo.style.display = "";
+
+                var today = todayStr();
+                var pending = tasks.filter(function (t) {
+                    return !isDone(t);
+                });
+                var done = tasks.filter(function (t) {
+                    return isDone(t);
+                });
+
+                var todayTasks = pending.filter(function (t) {
+                    if (t.repeat) return occursOn(t, today);
+                    return t.date === null || t.date === today;
+                });
+                var todayDone = done.filter(function (t) {
+                    if (t.repeat) return occursOn(t, today);
+                    return t.date === null || t.date === today;
+                });
+
+                els.strip.innerHTML = "";
+                var total = todayTasks.length + todayDone.length;
+                if (els.todoCount) {
+                    els.todoCount.textContent = total ? todayDone.length + "/" + total + " done" : "";
+                }
+                if (!total) {
+                    var empty = document.createElement("div");
+                    empty.className = "empty";
+                    empty.textContent = "No tasks for today";
+                    els.strip.appendChild(empty);
+                } else {
+                    todayTasks.concat(todayDone).forEach(function (t) {
+                        els.strip.appendChild(makeChip(t));
+                    });
+                }
+
+                if (els.detail.classList.contains("open")) {
+                    renderDetail();
+                }
+            }
+
+            /* ---------------- Schedule popover ---------------- */
+
+            var activeTask = null;
+
+            function openSchedule(t, anchor) {
+                activeTask = t;
+                var menu = els.schedule;
+
+                menu.innerHTML = "";
+
+                var repeatLabelEl = document.createElement("div");
+                repeatLabelEl.className = "menu-label";
+                repeatLabelEl.textContent = "Repeat";
+                menu.appendChild(repeatLabelEl);
+
+                var repeatRow = document.createElement("div");
+                repeatRow.className = "repeat-row";
+                [null, "daily", "weekly", "monthly"].forEach(function (rep) {
+                    var b = document.createElement("button");
+                    b.type = "button";
+                    b.className = "repeat-opt" + (t.repeat === rep ? " active" : "");
+                    b.textContent = rep === null ? "None" : (rep.charAt(0).toUpperCase() + rep.slice(1));
+                    b.addEventListener("click", function () {
+                        setRepeat(t.id, rep);
+                        menu.style.display = "none";
+                    });
+                    repeatRow.appendChild(b);
+                });
+                menu.appendChild(repeatRow);
+
+                var sep = document.createElement("div");
+                sep.className = "menu-sep";
+                menu.appendChild(sep);
+
+                var labelEl = document.createElement("div");
+                labelEl.className = "menu-label";
+                labelEl.textContent = "Due date";
+                menu.appendChild(labelEl);
+
+                var options = [
+                    { label: "Today", value: todayStr() },
+                    { label: "Tomorrow", value: shiftDays(1) },
+                    { label: "+2 days", value: shiftDays(2) },
+                    { label: "+3 days", value: shiftDays(3) },
+                    { label: "+7 days", value: shiftDays(7) },
+                    { label: "— Clear date", value: null }
+                ];
+
+                options.forEach(function (opt) {
+                    var b = document.createElement("button");
+                    b.type = "button";
+                    b.textContent = opt.label;
+                    b.addEventListener("click", function () {
+                        scheduleTask(t.id, opt.value);
+                        menu.style.display = "none";
+                    });
+                    menu.appendChild(b);
+                });
+
+                var r = anchor.getBoundingClientRect();
+                menu.style.display = "block";
+                var width = menu.offsetWidth;
+                var left = r.right - width;
+                left = Math.max(8, Math.min(window.innerWidth - width - 8, left));
+                var top = r.bottom + 6;
+                if (top + menu.offsetHeight > window.innerHeight - 8) {
+                    top = r.top - menu.offsetHeight - 6;
+                }
+                menu.style.left = left + "px";
+                menu.style.top = top + "px";
+            }
+
+            function closeSchedule(e) {
+                if (!e || !els.schedule.contains(e.target)) {
+                    els.schedule.style.display = "none";
+                }
+            }
+
+            document.addEventListener("click", closeSchedule);
+
+            /* ---------------- Daily quote ---------------- */
+
+            function quotePool() {
+                return (window.FCW_QUOTES && window.FCW_QUOTES.length) ? window.FCW_QUOTES : [];
+            }
+
+            /* pick the quote for the current 2-minute slot, rotating through the category */
+            function pickQuote(category) {
+                var pool = quotePool();
+                if (!pool.length) {
+                    return { q: "It does not matter how slowly you go as long as you do not stop.", a: "Confucius" };
+                }
+                var catPool = pool;
+                if (category) {
+                    var filtered = pool.filter(function (x) { return x.c === category; });
+                    if (filtered.length) catPool = filtered;
+                }
+                var twoMin = Math.floor(Date.now() / (2 * 60 * 1000));
+                var idx = twoMin % catPool.length;
+                return catPool[idx];
+            }
+
+            function renderQuote() {
+                if (!settings.showQuote) {
+                    els.quote.style.display = "none";
+                    return;
+                }
+                els.quote.style.display = "";
+                var q = pickQuote(settings.quoteCategory);
+                els.quote.innerHTML = "";
+                var text = document.createElement("div");
+                text.className = "quote-text";
+                text.textContent = "“" + q.q + "”";
+                var author = document.createElement("span");
+                author.className = "quote-author";
+                author.textContent = "— " + q.a;
+                var cat = document.createElement("span");
+                cat.className = "quote-cat";
+                cat.textContent = settings.quoteCategory;
+                cat.title = "Click to change category";
+                cat.addEventListener("click", function () {
+                    var idx = quoteCategories.indexOf(settings.quoteCategory);
+                    var next = quoteCategories[(idx + 1) % quoteCategories.length];
+                    settings.quoteCategory = next;
+                    renderQuote();
+                    saveJSON("fcw-settings", settings);
+                });
+                els.quote.appendChild(text);
+                els.quote.appendChild(author);
+                els.quote.appendChild(cat);
+            }
+
+            /* ---------------- Clock ---------------- */
+
+            function createClock() {
+                if (instance) {
+                    try {
+                        instance.unmount();
+                    } catch (e) {}
+                    instance = null;
+                }
+
+                var size = settings.clockSize;
+                var css = FlipClock.css({
+                    fontSize: "clamp(" + Math.round(2.5 * size * 10) / 10 + "rem, " + Math.round(6 * size * 10) / 10 + "vw, " + Math.round(6 * size * 10) / 10 + "rem)",
+                    animationDuration: "350ms"
+                });
+
+                var face = FlipClock.clock({ format: settings.format });
+
+                instance = FlipClock.flipClock({
+                    parent: els.clock,
+                    autoStart: true,
+                    timer: 1000,
+                    face: face,
+                    theme: FlipClock.theme({ css: css })
+                });
+            }
+
+            function applyAccent() {
+                document.documentElement.style.setProperty("--accent", settings.accent);
+            }
+
+            function updateDate() {
+                var now = new Date();
+                var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                var months = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+                els.date.textContent = days[now.getDay()] + ", " +
+                    months[now.getMonth()] + " " +
+                    now.getDate();
+            }
+
+            function applySettings() {
+                createClock();
+                applyAccent();
+                renderTodo();
+                renderQuote();
+                updateDate();
+            }
+
+            /* ---------------- Form handling ---------------- */
+
+            els.form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                addTask(els.input.value);
+                els.input.value = "";
+                els.input.focus();
+            });
+
+            /* make the todo list wheel-scroll reliably even without window focus */
+            els.strip.addEventListener("wheel", function (e) {
+                var canDown = els.strip.scrollTop + els.strip.clientHeight < els.strip.scrollHeight;
+                var canUp = els.strip.scrollTop > 0;
+                var goingDown = e.deltaY > 0;
+                if ((goingDown && canDown) || (!goingDown && canUp)) {
+                    e.preventDefault();
+                    els.strip.scrollTop += (goingDown ? 1 : -1) * 48;
+                }
+            }, { passive: false });
+
+            /* ---------------- Detail + reminder ---------------- */
+
+            els.detailBtn.addEventListener("click", openDetail);
+            els.detailClose.addEventListener("click", closeDetail);
+            els.detail.addEventListener("click", function (e) {
+                if (e.target === els.detail) closeDetail();
+            });
+
+            var reminderTimer = null;
+
+            function dueTasks() {
+                var today = todayStr();
+                return tasks.filter(function (t) {
+                    if (isDone(t)) return false;
+                    if (t.repeat) return occursOn(t, today);
+                    return t.date === null || t.date <= today;
+                });
+            }
+
+            function showReminder() {
+                var due = dueTasks();
+                if (!due.length) {
+                    els.reminder.classList.remove("show");
+                    return;
+                }
+                var task = due[0];
+                var prefix;
+                if (task.repeat) {
+                    prefix = "Recurring (" + repeatLabel(task) + ")";
+                } else if (task.date !== null && task.date < todayStr()) {
+                    prefix = "Overdue";
+                } else {
+                    prefix = "Due today";
+                }
+                els.reminderText.textContent = prefix + " — " + task.text;
+                els.reminder.classList.add("show");
+                if (reminderTimer) clearTimeout(reminderTimer);
+                reminderTimer = setTimeout(function () {
+                    els.reminder.classList.remove("show");
+                }, 6000);
+            }
+
+            els.reminderClose.addEventListener("click", function () {
+                els.reminder.classList.remove("show");
+                if (reminderTimer) clearTimeout(reminderTimer);
+            });
+
+            function checkReminder() {
+                if (document.hidden) return;
+                var due = dueTasks();
+                if (due.length && !els.reminder.classList.contains("show")) {
+                    showReminder();
+                }
+            }
+
+            /* ---------------- Background (every 15 min) ---------------- */
+
+            var ambient = document.getElementById("ambient");
+            var ambientPalette = [
+                ["#0a84ff", "#ff2d55", "#00b8a9"],
+                ["#ff9f0a", "#ff375f", "#5e5ce6"],
+                ["#00c7be", "#bf5af2", "#ff6482"],
+                ["#30d158", "#0a84ff", "#ffd60a"]
+            ];
+
+            function applyAmbient() {
+                if (!ambient) return;
+                var now = new Date();
+                var quarter = Math.floor(now.getMinutes() / 15);
+                var palette = ambientPalette[quarter % ambientPalette.length];
+                ambient.style.setProperty("--blob-a", palette[0]);
+                ambient.style.setProperty("--blob-b", palette[1]);
+                ambient.style.setProperty("--blob-c", palette[2]);
+            }
+
+            /* ---------------- Lively Properties ---------------- */
+
+            window.livelyPropertyListener = function (id, value) {
+                var key = null;
+
+                if (id.indexOf("lively_") === 0) {
+                    key = id.slice("lively_".length);
+                } else {
+                    var names = Object.keys(defaults);
+                    for (var i = 0; i < names.length; i++) {
+                        if (id.indexOf(names[i]) !== -1) {
+                            key = names[i];
+                            break;
+                        }
+                    }
+                }
+
+                if (!key || !(key in defaults)) {
+                    return;
+                }
+
+                if (key === "format") {
+                    var idx = parseInt(value, 10);
+                    settings.format = formatItems[idx] || formatItems[0];
+                } else if (key === "clockSize") {
+                    settings.clockSize = parseFloat(value) || 1;
+                } else if (key === "accent") {
+                    settings.accent = value;
+                } else if (key === "quoteCategory") {
+                    settings.quoteCategory = quoteCategories[parseInt(value, 10)] || "Discipline";
+                } else if (key === "showTodo") {
+                    settings.showTodo = !!value;
+                } else if (key === "showQuote") {
+                    settings.showQuote = !!value;
+                }
+
+                applySettings();
+            };
+
+            window.addEventListener("resize", function () {
+                updateDate();
+            });
+
+            /* ---------------- Init ---------------- */
+
+            var saved = loadJSON("fcw-settings", null);
+            if (saved) {
+                Object.keys(defaults).forEach(function (k) {
+                    if (saved[k] !== undefined) settings[k] = saved[k];
+                });
+            }
+
+            applySettings();
+            applyAmbient();
+            setInterval(updateDate, 30000);
+            setInterval(applyAmbient, 15000);
+            setInterval(checkReminder, 30000);
+            setInterval(renderQuote, 2 * 60 * 1000);
+            showReminder();
+        })();
+    </script>
+</body>
+</html>
