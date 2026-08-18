@@ -25,11 +25,12 @@ A dynamic desktop wallpaper built for **Lively Wallpaper** — featuring a liqui
 ### Option 1 — Download & drop (easiest, recommended)
 
 1. Download this repository as a **ZIP**: click the green **Code → Download ZIP** button.
-2. Open **Lively Wallpaper**.
-3. **Drag & drop** the downloaded `Wallpaper-main.zip` file directly onto the Lively window (do **not** extract it first).
-4. The wallpaper appears in your library — double-click it to apply.
+2. **Extract** the ZIP (right-click → Extract All).
+3. Open **Lively Wallpaper**.
+4. **Drag & drop the extracted `Wallpaper-main` folder** onto the Lively window (or select the `index.html` inside it via the `+` button).
+5. The wallpaper appears in your library — double-click it to apply.
 
-> `LivelyInfo.json` sits at the root of the project, so the ZIP imports without any extra steps.
+> GitHub always wraps downloads in a `Wallpaper-main` folder, so drop the folder (not the zip). `LivelyInfo.json` is at the top of that folder, so it imports cleanly.
 
 ### Option 2 — Single-file package
 
