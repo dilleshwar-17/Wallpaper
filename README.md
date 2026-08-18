@@ -8,6 +8,8 @@ A dynamic desktop wallpaper built for **Lively Wallpaper** — featuring a liqui
 - **Dynamic quotes** — 100 hand-picked motivational quotes across 10 categories, rotating every 2 minutes
 - **To-do list widget** — add, edit, complete, and delete tasks directly on your wallpaper
   - Schedule due dates (Today / Tomorrow / +2 / +3 / +7 days)
+  - Set a reminder **time** (e.g. 2:30 PM) for any task
+  - Notification banner **5 minutes before**, **1 minute before**, and at the due time
   - Recurring tasks (Daily / Weekly / Monthly)
   - Day-wise overview (Previous / Today / Future)
   - Reminder banner for due/overdue tasks
@@ -73,10 +75,17 @@ Right-click the wallpaper (or open its settings in Lively) to adjust:
 
 - Type a task in the input box and press **Enter** (or click **Add**).
 - Click the **checkbox** to complete a task.
-- Click the **date/time chip** on a task to set a due date or make it recurring.
+- Click the **date/time chip** on a task to set a due date, a reminder time, or make it recurring.
+  - Pick a date (**Today / Tomorrow / +2 / +3 / +7 days** or **Clear date**).
+  - Pick a time with the ⏰ clock icon (or type `HH:MM`), or press **Clear** to remove it.
+  - A task with a time shows on its chip, e.g. `Today · 2:30 PM`.
 - Click **✎** to edit a task, **✕** to delete it.
 - Click **☰ All** to open the full day-wise view (Previous / Today / Future).
-- Overdue and due-today tasks show a reminder banner at the top of the screen.
+- Reminder banners appear at the top of the screen:
+  - **"5 minutes until"** and **"1 minute until"** before a scheduled time
+  - **"Due now"** when the time arrives
+  - **Overdue** / **Due today** banners for date-based tasks
+- Tasks with a reminder time only count as due once their time arrives; without a time they stay due all day.
 
 ## Project Structure
 
