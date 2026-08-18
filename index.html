@@ -822,6 +822,35 @@
             border-color: var(--accent);
         }
 
+        #schedule .time-row {
+            display: flex;
+            gap: 0.35rem;
+            align-items: center;
+            padding: 0.2rem 0.55rem 0.45rem;
+        }
+
+        #schedule input[type="time"] {
+            flex: 1 1 auto;
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 11px;
+            padding: 0.4rem 0.5rem;
+            color: var(--label);
+            font-size: 0.85rem;
+            color-scheme: light;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #schedule .time-clear {
+            flex: 0 0 auto;
+            width: auto;
+            text-align: center;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.8rem;
+        }
+
         #schedule .menu-sep {
             height: 1px;
             background: rgba(28, 28, 30, 0.14);
@@ -1054,7 +1083,7 @@
             function addTask(text) {
                 text = text.trim();
                 if (!text) return;
-                tasks.push({ id: uid(), text: text, done: false, date: null, repeat: null, lastDone: null });
+                tasks.push({ id: uid(), text: text, done: false, date: null, time: null, repeat: null, lastDone: null });
                 saveTasks();
             }
 
@@ -1105,6 +1134,25 @@
                     return t;
                 });
                 saveTasks();
+            }
+
+            function scheduleTaskTime(id, time) {
+                tasks = tasks.map(function (t) {
+                    if (t.id === id) t.time = time || null;
+                    return t;
+                });
+                saveTasks();
+            }
+
+            function friendlyTime(time) {
+                if (!time) return "";
+                var parts = time.split(":");
+                var h = parseInt(parts[0], 10);
+                var m = parts[1] || "00";
+                if (isNaN(h)) return "";
+                var ampm = h >= 12 ? "PM" : "AM";
+                var h12 = h % 12 === 0 ? 12 : h % 12;
+                return h12 + ":" + m + " " + ampm;
             }
 
             function friendlyDate(date) {
@@ -1186,7 +1234,17 @@
                 var when = document.createElement("span");
                 when.className = "when";
                 var rl = repeatLabel(t);
-                when.textContent = rl || friendlyDate(t.date);
+                var ft = friendlyTime(t.time);
+                var whenText;
+                if (rl) {
+                    whenText = rl;
+                } else if (t.date === null && t.time) {
+                    whenText = ft;
+                } else {
+                    whenText = friendlyDate(t.date);
+                }
+                if (ft && whenText !== ft) whenText += " · " + ft;
+                when.textContent = whenText;
                 if (rl) {
                     when.classList.add("repeat");
                     if (t.date !== null && !occursOn(t, todayStr()) && !isDone(t)) {
@@ -1436,6 +1494,38 @@
                     menu.appendChild(b);
                 });
 
+                var timeSep = document.createElement("div");
+                timeSep.className = "menu-sep";
+                menu.appendChild(timeSep);
+
+                var timeLabelEl = document.createElement("div");
+                timeLabelEl.className = "menu-label";
+                timeLabelEl.textContent = "Time";
+                menu.appendChild(timeLabelEl);
+
+                var timeRow = document.createElement("div");
+                timeRow.className = "time-row";
+
+                var timeInput = document.createElement("input");
+                timeInput.type = "time";
+                timeInput.value = t.time || "";
+                timeInput.addEventListener("change", function () {
+                    scheduleTaskTime(t.id, timeInput.value || null);
+                });
+                timeRow.appendChild(timeInput);
+
+                var timeClear = document.createElement("button");
+                timeClear.type = "button";
+                timeClear.className = "time-clear";
+                timeClear.textContent = "Clear";
+                timeClear.addEventListener("click", function () {
+                    timeInput.value = "";
+                    scheduleTaskTime(t.id, null);
+                });
+                timeRow.appendChild(timeClear);
+
+                menu.appendChild(timeRow);
+
                 var r = anchor.getBoundingClientRect();
                 menu.style.display = "block";
                 var width = menu.offsetWidth;
@@ -1593,8 +1683,23 @@
                 return tasks.filter(function (t) {
                     if (isDone(t)) return false;
                     if (t.repeat) return occursOn(t, today);
-                    return t.date === null || t.date <= today;
+                    if (t.date !== null && t.date < today) return true;
+                    if (t.date !== null && t.date > today) return false;
+                    if (t.time) {
+                        var due = new Date(today + "T" + t.time + ":00");
+                        return !isNaN(due.getTime()) && Date.now() >= due.getTime();
+                    }
+                    return true;
                 });
+            }
+
+            function showReminderText(text) {
+                els.reminderText.textContent = text;
+                els.reminder.classList.add("show");
+                if (reminderTimer) clearTimeout(reminderTimer);
+                reminderTimer = setTimeout(function () {
+                    els.reminder.classList.remove("show");
+                }, 8000);
             }
 
             function showReminder() {
@@ -1612,12 +1717,7 @@
                 } else {
                     prefix = "Due today";
                 }
-                els.reminderText.textContent = prefix + " — " + task.text;
-                els.reminder.classList.add("show");
-                if (reminderTimer) clearTimeout(reminderTimer);
-                reminderTimer = setTimeout(function () {
-                    els.reminder.classList.remove("show");
-                }, 6000);
+                showReminderText(prefix + " — " + task.text);
             }
 
             els.reminderClose.addEventListener("click", function () {
@@ -1630,6 +1730,62 @@
                 var due = dueTasks();
                 if (due.length && !els.reminder.classList.contains("show")) {
                     showReminder();
+                }
+            }
+
+            /* ---- Time-based alerts (5 min / 1 min / due now) ---- */
+
+            var firedReminders = {};
+
+            /* returns the millisecond timestamp a task becomes due today, or null */
+            function taskDueMoment(t) {
+                var today = todayStr();
+                if (t.repeat) {
+                    if (!occursOn(t, today)) return null;
+                } else if (t.date !== null && t.date !== today) {
+                    return null;
+                }
+                if (!t.time) return null;
+                var d = new Date(today + "T" + t.time + ":00");
+                return isNaN(d.getTime()) ? null : d.getTime();
+            }
+
+            function checkTimeReminder() {
+                if (document.hidden) return;
+                var now = Date.now();
+                tasks.forEach(function (t) {
+                    if (isDone(t)) return;
+                    var due = taskDueMoment(t);
+                    if (due === null) return;
+                    var diff = due - now;
+                    var keyBase = t.id + "-" + due;
+                    if (diff > 5 * 60000) return;
+
+                    if (diff > 60000 && diff <= 5 * 60000) {
+                        var k5 = keyBase + "-5m";
+                        if (!firedReminders[k5]) {
+                            firedReminders[k5] = true;
+                            showReminderText("5 minutes until — " + t.text);
+                        }
+                    } else if (diff > 0 && diff <= 60000) {
+                        var k1 = keyBase + "-1m";
+                        if (!firedReminders[k1]) {
+                            firedReminders[k1] = true;
+                            showReminderText("1 minute until — " + t.text);
+                        }
+                    } else if (diff <= 0 && diff > -60000) {
+                        var kd = keyBase + "-due";
+                        if (!firedReminders[kd]) {
+                            firedReminders[kd] = true;
+                            showReminderText("Due now — " + t.text);
+                        }
+                    }
+                });
+
+                for (var k in firedReminders) {
+                    var parts = k.split("-");
+                    var dueTs = parseInt(parts[parts.length - 2], 10);
+                    if (now - dueTs > 3600 * 1000) delete firedReminders[k];
                 }
             }
 
@@ -1709,9 +1865,16 @@
             applyAmbient();
             setInterval(updateDate, 30000);
             setInterval(applyAmbient, 15000);
-            setInterval(checkReminder, 30000);
+            setInterval(function () {
+                checkReminder();
+                checkTimeReminder();
+            }, 30000);
             setInterval(renderQuote, 2 * 60 * 1000);
+            document.addEventListener("visibilitychange", function () {
+                if (!document.hidden) checkTimeReminder();
+            });
             showReminder();
+            checkTimeReminder();
         })();
     </script>
 </body>
