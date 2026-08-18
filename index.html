@@ -100,9 +100,23 @@
             padding: 2rem;
         }
 
+        #center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            z-index: 2;
+            pointer-events: none;
+        }
+
         #clock {
             position: relative;
             display: inline-flex;
+            pointer-events: auto;
         }
 
         #date {
@@ -923,8 +937,10 @@
 
     <div id="app">
         <div id="quote" class="glass-sheen"></div>
-        <div id="clock"></div>
-        <div id="date"></div>
+        <div id="center">
+            <div id="clock"></div>
+            <div id="date"></div>
+        </div>
         <aside id="todo" class="glass-sheen">
             <div id="todo-top">
                 <h2>Today's Tasks <span id="todo-count"></span></h2>
@@ -1570,6 +1586,7 @@
             }
 
             function renderQuote() {
+                applyAmbient();
                 if (!settings.showQuote) {
                     els.quote.style.display = "none";
                     return;
@@ -1789,7 +1806,7 @@
                 }
             }
 
-            /* ---------------- Background (every 15 min) ---------------- */
+            /* ---------------- Background (changes with every quote) ---------------- */
 
             var ambient = document.getElementById("ambient");
             var ambientPalette = [
@@ -1801,9 +1818,8 @@
 
             function applyAmbient() {
                 if (!ambient) return;
-                var now = new Date();
-                var quarter = Math.floor(now.getMinutes() / 15);
-                var palette = ambientPalette[quarter % ambientPalette.length];
+                var twoMin = Math.floor(Date.now() / (2 * 60 * 1000));
+                var palette = ambientPalette[twoMin % ambientPalette.length];
                 ambient.style.setProperty("--blob-a", palette[0]);
                 ambient.style.setProperty("--blob-b", palette[1]);
                 ambient.style.setProperty("--blob-c", palette[2]);
@@ -1862,9 +1878,7 @@
             }
 
             applySettings();
-            applyAmbient();
             setInterval(updateDate, 30000);
-            setInterval(applyAmbient, 15000);
             setInterval(function () {
                 checkReminder();
                 checkTimeReminder();
