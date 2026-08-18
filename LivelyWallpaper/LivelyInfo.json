@@ -1,17 +1,25 @@
 {
   "AppVersion": "2.2.1.0",
   "Title": "Flip Clock Wallpaper",
-  "Thumbnail": null,
+  "Thumbnail": "lively_t.jpg",
   "Preview": null,
-  "Desc": "A realtime flip clock with a configurable to-do list.",
-  "Author": "you",
+  "Desc": "A liquid-glass desktop wallpaper with an animated flip clock, rotating motivational quotes and a to-do list widget. Fully customizable.",
+  "Author": "dilleshwar-17",
   "License": "MIT",
-  "Contact": null,
+  "Contact": "https://github.com/dilleshwar-17",
   "Type": 1,
   "FileName": "index.html",
   "Arguments": null,
   "IsAbsolutePath": false,
   "Id": null,
-  "Tags": null,
+  "Tags": [
+    "clock",
+    "flip clock",
+    "quote",
+    "motivation",
+    "to-do",
+    "widget",
+    "minimal"
+  ],
   "Version": 1
 }
